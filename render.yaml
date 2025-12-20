@@ -1,0 +1,8 @@
+services:
+  -type: web
+  name: mael
+  env: python
+  plan: free
+  pythonVersion: 3.12.0
+  buildCommand: 'pip install -r requirements.txt'
+  startCommand: 'python main.py'
