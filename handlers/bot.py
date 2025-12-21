@@ -25,14 +25,14 @@ class Mael:
     def esperando_datos(self):
         async def func(flt, _, message):
             user_id = message.from_user.id
-            return self.user_states[user_id] == 'esperando datos'
+            return self.user_states.get(user_id) == 'esperando datos'
         return filters.create(func)
     
     # otro atributo que filtra el mensaje del usuario en un estado en especifico
     def esperando_fecha(self):
         async def funcion(flt, _, message):
             user_id = message.from_user.id
-            return self.user_states[user_id] == 'esperando fecha'
+            return self.user_states.get(user_id) == 'esperando fecha'
         return filters.create(funcion)
         
     # los comandos del bot
