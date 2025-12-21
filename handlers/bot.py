@@ -21,6 +21,9 @@ class Mael:
         
         self.comandos()
         
+        carpeta_dowloands = config.root_dir / 'downloads'
+        carpeta_dowloands.mkdir(parents=True, exist_ok=True)
+        
     # un atributo que filtra el mensaje del usuario en un estado en especifico
     def esperando_datos(self):
         async def func(flt, _, message):

@@ -9,6 +9,9 @@ class MaelDB:
         # url de la bd 
         self.db_url = config.db_url
         self.conexion_db()
+        
+        carpeta_dowloands = config.root_dir / 'downloads'
+        carpeta_dowloands.mkdir(parents=True, exist_ok=True)
     
     # conexion con la bd
     def conexion_db(self):
