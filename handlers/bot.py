@@ -168,11 +168,9 @@ class Mael:
         
         # un mensajito de prueba
         # MEJORAR ESTO, PUEDE SERVIR COMO UN MINI EASTEREGG  
-        @self.bot.on_message(filters.text)
+        @self.bot.on_message(filters.text & ~filters.regex(r'^/'))
         async def saludo(client, message):
             text = message.text.strip()
-            if text.startswith('/'):
-                return
             
             await message.reply_text('holaa, gracias por usar mi proyecto y contribuir con tus fotos del cielo :D \n\n-Snex')
             
