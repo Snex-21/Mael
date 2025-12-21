@@ -85,14 +85,17 @@ class MaelDB:
     def foto(self,photo):
         self.photo = photo
         url = self.obtener_dato(self.photo)
-        estado = requests.get(url)
-        
-        # ruta relativa de la ultima imagen descargada para posteriormente mandarsela al usuario
-        ruta = config.root_dir / 'downloads' / 'imagen.jpg'
-        
-        if estado.status_code == 200:
-            with open(ruta, 'wb') as f:
-                f.write(estado.content)
-        
-        # retorna la ruta donde se descargo la ft
-        return ruta
+        if url == None:
+            return None
+        else:
+            estado = requests.get(url)
+            
+            # ruta relativa de la ultima imagen descargada para posteriormente mandarsela al usuario
+            ruta = config.root_dir / 'downloads' / 'imagen.jpg'
+            
+            if estado.status_code == 200:
+                with open(ruta, 'wb') as f:
+                    f.write(estado.content)
+            
+            # retorna la ruta donde se descargo la ft
+            return ruta

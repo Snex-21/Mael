@@ -86,13 +86,14 @@ class Mael:
                 # HACER UNA MEJOR RESPUESTA
                 await message.reply_text(f'Parece que no tengo ninguna foto del cielo con la fecha {fecha}.\nMandame otra fecha en dia/mes/año y lo intento de nuevo.')
             
-            # ETAPA FINAL
-            await client.send_photo(
-                chat_id = message.from_user.id,
-                photo = foto,
-                # MEJORAR EL CAPTION (QUIZAS CON LA FECHA Y EL NUMERO DE FOTO, ID O NUM DE FOTOS CON ESA FECHA)
-                caption = 'Listo, encontré la foto del cielo. Mirala y decime si quieres buscar otra.'
-            )
+            else:
+                # ETAPA FINAL
+                await client.send_photo(
+                    chat_id = message.from_user.id,
+                    photo = foto,
+                    # MEJORAR EL CAPTION (QUIZAS CON LA FECHA Y EL NUMERO DE FOTO, ID O NUM DE FOTOS CON ESA FECHA)
+                    caption = 'Listo, encontré la foto del cielo. Mirala y decime si quieres buscar otra.'
+                )
             
             self.user_states[user_id] = 'iniciado'
             
