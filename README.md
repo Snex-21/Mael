@@ -19,7 +19,7 @@ Los usuarios pueden enviar imágenes o solicitar que Mael muestre fotos guardada
 
 ## Tecnologías utilizadas
 - **Python** como lenguaje principal.
-**[Pyrogram](https://docs.pyrogram.org/) + [tgcrypto](https://github.com/pyrogram/tgcrypto)**: para la gestión del bot en Telegram.
+- **[Pyrogram](https://docs.pyrogram.org/) + [tgcrypto](https://github.com/pyrogram/tgcrypto)**: para la gestión del bot en Telegram.
 - **PostgreSQL + [psycopg2](https://www.psycopg.org/docs/)**: PostgreSQL es la base de datos donde se guarda la información (imágenes, datos asociados, etc.). 
 psycopg2 es la librería que permite a Python conectarse y comunicarse con PostgreSQL.
 - **[Cloudinary](https://cloudinary.com/)**: Servicio en la nube utilizado para almacenar las imágenes del cielo.
@@ -74,7 +74,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
         - [ ] descarte automatico de imágenes duplicadas
 - [ ] que se guarde en la bd el id del usuario que agregó la foto
     - [ ] que el usuario pueda ver las fotos que aportó
-    - [ ] agregar una forma de que el usuario que mando un a foto pueda borrarla si quiere (por id)
+    - [ ] agregar una forma de que el usuario que mando una foto pueda borrarla si quiere (por id)
 - [ ] mejor manejo de las fechas
 - [ ] mejora de errores y excepciones provocadas por el usuario
 - [ ] mejorar los mensajes de Mael
