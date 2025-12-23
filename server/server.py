@@ -7,6 +7,7 @@ app = Flask('__name__')
 def home():
     return 'Mael activo'
 
+port = int(os.environ.get("PORT", 10000))
+
 def run_flask():
-    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
