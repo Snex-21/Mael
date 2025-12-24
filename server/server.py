@@ -3,9 +3,9 @@ import os
 
 app = Flask('__name__')
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return 'Mael activo'
+    return 'Mael activo', 200
 
 port = int(os.environ.get("PORT", 10000))
 
