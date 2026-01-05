@@ -15,6 +15,9 @@ class LinkImage():
     # subo la ft a cloudinary
     def link_image(self, ruta= cg.root_dir / 'downloads' / 'ultima_imagen.jpg'):
         self.ruta = ruta
-        resultado = clup.upload(self.ruta)
+        resultado = clup.upload(
+            self.ruta,
+            folder = cg.cloudinary_folder,
+        )
         # retorna el link de la ft
         return resultado['secure_url']
