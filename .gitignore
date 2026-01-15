@@ -208,3 +208,6 @@ __marimo__/
 
 #proyecto 
 *.session
+
+# Env files (local secrets)
+handlers/claves/.env
