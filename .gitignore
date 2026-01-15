@@ -209,4 +209,10 @@ __marimo__/
 #proyecto 
 *.session
 
+# Env files (local secrets)
+handlers/claves/.env
+
 *.jpg
+*.jpeg
+*.img
+*.png
