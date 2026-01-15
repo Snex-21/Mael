@@ -21,18 +21,20 @@ class MaelDB:
         return conexion
     
     # para añadir a la bd la foto con su fecha y pais
-    def insertar_dato(self, pais, fecha, foto):
+    def insertar_dato(self, pais, fecha, foto, user_id):
         self.pais = pais
         # pasando la fecha a formato dia/mes/año con los slash
         self.fecha = datetime.strptime(fecha, '%d/%m/%Y').date()
         # aca se le pasa el link de la foto
         self.foto = foto
+        # id del usuario 
+        self.user_id = user_id
         
         conexion = self.conexion_db()
         cursor = conexion.cursor()
-        query = 'INSERT INTO fotos (pais, fecha, link_foto) VALUES (%s, %s,%s)'
+        query = 'INSERT INTO fotos (pais, fecha, link_foto, user_id) VALUES (%s, %s,%s,%s)'
         
-        cursor.execute(query, (self.pais, self.fecha, self.foto))
+        cursor.execute(query, (self.pais, self.fecha, self.foto, self.user_id))
         conexion.commit()
         
         cursor.close()

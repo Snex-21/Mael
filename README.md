@@ -72,7 +72,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
     - [ ] poder agg comentarios privado
     - [ ] detección de imágenes duplicadas
         - [ ] descarte automatico de imágenes duplicadas
-- [ ] que se guarde en la bd el id del usuario que agregó la foto
+- [x] que se guarde en la bd el id del usuario que agregó la foto
     - [ ] que el usuario pueda ver las fotos que aportó
     - [ ] agregar una forma de que el usuario que mando una foto pueda borrarla si quiere (por id)
 - [ ] mejor manejo de las fechas

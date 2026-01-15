@@ -152,7 +152,8 @@ class Mael:
             link = img.link_image()
             
             db = MaelDB()
-            db.insertar_dato(foto=link, fecha=fecha, pais=pais)
+            
+            db.insertar_dato(foto=link, fecha=fecha, pais=pais, user_id=user_id)
             
             self.user_states[user_id] = 'iniciado'
             self.user_data.pop(user_id)

@@ -15,7 +15,7 @@ db_url = os.getenv('db_url')
 cloud_name = os.getenv('cloud_name')
 api_key = os.getenv('api_key')
 api_secret = os.getenv('api_secret')
-cloudinary_carpeta = os.getenv('cloudinary_folder')
+cloudinary_folder = os.getenv('cloudinary_folder')
 
 from pathlib import Path
 
