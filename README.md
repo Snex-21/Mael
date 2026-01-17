@@ -73,7 +73,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
     - [ ] detección de imágenes duplicadas
         - [ ] descarte automatico de imágenes duplicadas
 - [x] que se guarde en la bd el id del usuario que agregó la foto
-    - [ ] que el usuario pueda ver las fotos que aportó
+    - [x] que el usuario pueda ver las fotos que aportó
     - [ ] agregar una forma de que el usuario que mando una foto pueda borrarla si quiere (por id)
 - [ ] mejor manejo de las fechas
 - [ ] mejora de errores y excepciones provocadas por el usuario
@@ -81,7 +81,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
 - [ ] comando para ver la ultima foto agg
 - [ ] si un usuario probó con 5 fechas y ninguna tiene foto, que el bot le mande 5 fechas que tengan foto al azar
 - [ ] poner en alguna parte la cantidad de fotos que hay disponibles (se va actualizando cada que se consulte)
-
+- [ ] que el bot pueda obtener el arroba del usuario y si esta disponible (si no con su ID) preuntarle si quiere que esa información aparezca con su foto
 ---
 
 ## Licencia
