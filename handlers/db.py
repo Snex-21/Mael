@@ -104,3 +104,28 @@ class MaelDB:
             
             # retorna la ruta donde se descargo la ft
             return ruta
+    
+    # atributo para ver las fotos aportadas por un usuario
+    def fotos_aportadas(self, id):
+        
+        # id del usuario
+        self.id = id
+        conexion = self.conexion_db()
+        cursor = conexion.cursor()
+        
+        # busca todas las fechas que haya con el id del usuario
+        query = 'SELECT fecha FROM fotos WHERE user_id = %s ORDER BY fecha ASC'
+        
+        with cursor:
+            cursor.execute(query, (self.id,))
+            resultado = cursor.fetchall()
+            fechas = []
+            if resultado == None:
+                return fechas
+            print(resultado)
+            for i in resultado:
+                # guardo las fechas en una tupla y despues la retorno
+                fechas.append(i[0])
+                print(i)
+                print(fechas)
+            return fechas

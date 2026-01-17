@@ -168,6 +168,7 @@ class Mael:
             await message.reply_text("""Acá están los comandos que podés usar:
             \n\n/buscar – escribí primero este comando, y después pasame la fecha en formato día/mes/año para que te muestre la foto del cielo.
             \n\n/agg – escribí primero este comando. Luego mandame la foto, y después el país y la fecha en un solo mensaje (día/mes/año) para guardarla.
+            \n\n/misaportes – para ver los aportes que hiciste
             \n\nUsalos como quieras, y yo estoy acá para acompañarte.""")
         
         # un mensajito de prueba
@@ -177,6 +178,27 @@ class Mael:
             text = message.text.strip()
             
             await message.reply_text('holaa, gracias por usar mi proyecto y contribuir con tus fotos del cielo :D \n\n-Snex')
+        
+        # comando para ver todas fotos aportadas por el usuario que usa el comando
+        @self.bot.on_message(filters.command('misaportes'))
+        async def fotos_aportadas(client, message):
+            # id del usuario
+            user_id = message.from_user.id
+            
+            db = MaelDB()
+            
+            # fechas de las fotos que aportó el usuario
+            fotos = db.fotos_aportadas(id=user_id)
+            if not fotos:
+                # si no hay fotos...
+                await message.reply('no tenes fotos aportadas')
+                return
+            else:
+                # si hay fotos (o sea, fehcas) le digo la cantidad y las fechas
+                texto = f'has aportado {len(fotos)} foto/s:\n\n'
+                for i, fecha in enumerate(fotos, start=1):
+                    texto += f'{i}. {fecha}\n'
+            await message.reply_text(texto)
             
     def run(self):
         self.bot.run()
