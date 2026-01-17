@@ -118,9 +118,14 @@ class MaelDB:
         
         with cursor:
             cursor.execute(query, (self.id,))
-            resultado = cursor.fetchone()
+            resultado = cursor.fetchall()
             fechas = []
+            if resultado == None:
+                return fechas
+            print(resultado)
             for i in resultado:
-                # guardo las fechas en una tpla y despues la retorno
-                fechas.append(resultado[0])
+                # guardo las fechas en una tupla y despues la retorno
+                fechas.append(i[0])
+                print(i)
+                print(fechas)
             return fechas
