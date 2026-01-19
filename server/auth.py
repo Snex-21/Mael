@@ -4,7 +4,7 @@ auth_bp = Blueprint("auth", __name__)
 
 
 ADMIN_PASSWRD = cg.ADMIN_PASSWRD
-KEY_SECRET = cg.KEY_SECRET
+KEY_SECRET = cg.flask_secret
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():

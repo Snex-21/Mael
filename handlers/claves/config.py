@@ -17,7 +17,7 @@ api_key = os.getenv('api_key')
 api_secret = os.getenv('api_secret')
 cloudinary_folder = os.getenv('cloudinary_folder')
 ADMIN_PASSWRD = os.getenv('ADMIN_PASSWORD')
-KEY_SECRET = os.getenv('FLASK_SECRET_KEY')
+flask_secret = os.getenv('FLASK_SECRET_KEY')
 
 from pathlib import Path
 
