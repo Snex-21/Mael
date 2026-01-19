@@ -29,3 +29,6 @@ def logout():
 def check_admin():
     if not session.get("admin"):
         return redirect("/login")
+
+
+#el que lea esto es gay
