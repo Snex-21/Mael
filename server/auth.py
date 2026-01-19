@@ -32,3 +32,4 @@ def check_admin():
 
 
 #el que lea esto es gay
+#solo pongo el msj para re subir y confirmar cambios
