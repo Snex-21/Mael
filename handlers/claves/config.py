@@ -23,3 +23,6 @@ from pathlib import Path
 
 # ruta relativa para la carpeta raiz del proyecto
 root_dir = Path(__file__).resolve().parent.parent.parent
+
+admin_password = os.getenv("ADMIN_PASSWORD")
+flask_secret = os.getenv("FLASK_SECRET_KEY")
