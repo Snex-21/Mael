@@ -1,7 +1,10 @@
 from flask import Flask
 import os
+from handlers.claves import config as cg
 
-app = Flask('__name__')
+app = Flask(__name__)
+
+app.secret_key = cg.flask_secret
 
 @app.route('/', methods=['GET'])
 def home():
