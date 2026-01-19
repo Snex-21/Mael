@@ -3,8 +3,8 @@ from handlers.claves import config as cg
 auth_bp = Blueprint("auth", __name__)
 
 
-ADMIN_PASSWRD = cg.admin_password
-KEY_SECRET = cg.flask_secret
+ADMIN_PASSWRD = cg.ADMIN_PASSWRD
+KEY_SECRET = cg.KEY_SECRET
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():

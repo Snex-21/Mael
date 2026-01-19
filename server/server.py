@@ -4,7 +4,7 @@ from handlers.claves import config as cg
 
 app = Flask(__name__)
 
-app.secret_key = cg.flask_secret
+app.secret_key = cg.KEY_SECRET
 
 @app.route('/', methods=['GET'])
 def home():
