@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fotos</title>
+    <style>
+        body{
+            margin:0;
+            background:#0f0f0f;
+            color:white;
+            font-family:Arial;
+        }
+        header{
+            background:#1a1a1a;
+            padding:15px;
+        }
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+        th, td{
+            border:1px solid #222;
+            padding:10px;
+            font-size:14px;
+        }
+        th{
+            background:#1a1a1a;
+        }
+        tr:nth-child(even){
+            background:#111;
+        }
+        a{
+            color:#5c5cff;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/admin">⬅ Volver</a>
+    <h3>Tabla de fotos</h3>
+</header>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>País</th>
+        <th>Fecha</th>
+        <th>Link</th>
+    </tr>
+
+    {% for f in fotos %}
+    <tr>
+        <td>{{ f.id }}</td>
+        <td>{{ f.pais }}</td>
+        <td>{{ f.fecha }}</td>
+        <td><a href="{{ f.link_foto }}" target="_blank">Ver</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

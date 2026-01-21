@@ -65,7 +65,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
 
 - [ ] panel de control (para admin):
     - [ ] poder autorizar o no que foto se sube a la bd y al cloudinary
-    - [ ] poder ver la cantidad de fotos que hay, con sus fechas y paises
+    - [x] poder ver la cantidad de fotos que hay, con sus fechas y paises
         - [ ] poder el ver la cantidad de fotos con cierta fecha o pais (de ser posible ordenados del mayor al menor)
     - [ ] poder ver la persona que mas aportó 
     - [ ] poder eliminar una foto de la bd y del cloudinary
@@ -94,6 +94,9 @@ Abre un [issue](https://github.com/Snex-21/Lazarus/issues) en el repositorio.
 
 ---
 
->**Hecho con gusto y dedicación por Snex**
+**Creditos:**
+- [Mik0-T3ch](https://github.com/Mik0-T3ch) - Desarrollo e implementación del panel de administración web
 
-Colaborador: Mik0-T3ch
+--- 
+
+>**Hecho con gusto y dedicación por Snex**
