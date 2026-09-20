@@ -75,7 +75,6 @@ class MaelDB:
         cursor.execute('TRUNCATE TABLE fotos RESTART IDENTITY;')
         conexion.commit()
         cursor.close()
-        conexion.cursor()
     
     # para borrar un una foto en especifico (por ID)
     def borrar_por_id(self, id):
@@ -85,6 +84,16 @@ class MaelDB:
         conexion.commit()
         cursor.close()
         conexion.close()
+    
+# obtener la última foto agregada
+    def obtener_ultima_foto(self):
+        conexion = self.conexion_db()
+        cursor = conexion.cursor()
+        cursor.execute('SELECT pais, fecha, link_foto FROM fotos ORDER BY id DESC LIMIT 1;')
+        registro = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+        return registro
     
     # atributo para descargar la foto
     def foto(self,photo):
@@ -122,10 +131,7 @@ class MaelDB:
             fechas = []
             if resultado == None:
                 return fechas
-            print(resultado)
             for i in resultado:
                 # guardo las fechas en una tupla y despues la retorno
                 fechas.append(i[0])
-                print(i)
-                print(fechas)
             return fechas
