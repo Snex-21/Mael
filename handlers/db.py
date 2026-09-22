@@ -56,17 +56,20 @@ class MaelDB:
         
         # si hay mas de una foto de una foto con esaa foto elije una random
         if len(registros) > 1:
-            url = random.choice(registros)[3]
+            registro = random.choice(registros)
+            pais = registro[1]
+            url = registro[3]
         
         else:
-            # si solo hay una, la selecciona (toma el link)
+            # si solo hay una, la selecciona (toma el link y el pais)
             url = registros[0][3]
+            pais = registros[0][1]
         
         cursor.close()
         conexion.close()
         
         # retorna el link
-        return url
+        return url, pais
     
     # para borrar toda la bd
     def borrar_todo(self):
@@ -98,7 +101,7 @@ class MaelDB:
     # atributo para descargar la foto
     def foto(self,photo):
         self.photo = photo
-        url = self.obtener_dato(self.photo)
+        url, pais = self.obtener_dato(self.photo)
         if url == None:
             return None
         else:
@@ -112,7 +115,7 @@ class MaelDB:
                     f.write(estado.content)
             
             # retorna la ruta donde se descargo la ft
-            return ruta
+            return ruta, pais
     
     # atributo para ver las fotos aportadas por un usuario
     def fotos_aportadas(self, id):
@@ -135,3 +138,19 @@ class MaelDB:
                 # guardo las fechas en una tupla y despues la retorno
                 fechas.append(i[0])
             return fechas
+
+    # obtener lista de países únicos registrados en la base de datos
+    def obtener_paises_unicos(self):
+        conexion = self.conexion_db()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT DISTINCT pais FROM fotos WHERE pais IS NOT NULL AND pais != '' ORDER BY pais ASC;")
+        registros = cursor.fetchall()
+        cursor.close()
+        conexion.close()
+        paises = [r[0].strip().capitalize() for r in registros if r[0]]
+        # Eliminar duplicados manteniendo orden
+        paises_unicos = []
+        for p in paises:
+            if p not in paises_unicos:
+                paises_unicos.append(p)
+        return paises_unicos

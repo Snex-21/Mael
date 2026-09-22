@@ -10,10 +10,12 @@ Los usuarios pueden enviar imágenes o solicitar que Mael muestre fotos guardada
 
 | Comando | Descripción |
 |------|-----------|
-| `/start` | Inicia el bot |
-| `/info` | Muestra información general y ayuda |
-| `/buscar` | Busca y muestra imágenes del cielo según lo indicado |
-| `/agg` | Agrega nuevas imágenes del cielo al sistema |
+| `/start` | Inicia el bot y da la bienvenida al usuario. |
+| `/info` | Muestra la lista de comandos disponibles y su funcionamiento. |
+| `/buscar` | Busca y muestra una foto del cielo según la fecha especificada (`día/mes/año`). |
+| `/agg` | Permite guardar una nueva foto del cielo usando botones interactivos para elegir país y fecha. |
+| `/ultima` | Muestra la última foto que fue agregada a la colección. |
+| `/misaportes` | Muestra el listado de todas las fotos que ha aportado el usuario. |
 
 ---
 
@@ -75,13 +77,14 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
 - [x] que se guarde en la bd el id del usuario que agregó la foto
     - [x] que el usuario pueda ver las fotos que aportó
     - [ ] agregar una forma de que el usuario que mando una foto pueda borrarla si quiere (por id)
-- [ ] mejor manejo de las fechas
+- [x] mejor manejo de las fechas
 - [ ] mejora de errores y excepciones provocadas por el usuario
-- [ ] mejorar los mensajes de Mael
+- [x] mejorar los mensajes de Mael
 - [x] comando para ver la ultima foto agg
 - [ ] si un usuario probó con 5 fechas y ninguna tiene foto, que el bot le mande 5 fechas que tengan foto al azar
 - [ ] poner en alguna parte la cantidad de fotos que hay disponibles (se va actualizando cada que se consulte)
-- [ ] que el bot pueda obtener el arroba del usuario y si esta disponible (si no con su ID) preuntarle si quiere que esa información aparezca con su foto
+- [ ] que el bot pueda obtener el arroba del usuario y si esta disponible (si no con su ID) preguntarle si quiere que esa información aparezca con su foto
+- [ ] soporte para varios idiomas 
 ---
 
 ## Licencia
