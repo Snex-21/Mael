@@ -2,6 +2,7 @@ from flask import Blueprint, render_template
 from server.auth import check_admin
 import psycopg2
 from handlers.claves.config import db_url
+from handlers.countries import get_country_name
 
 routes_bp = Blueprint("routes", __name__)
 
@@ -27,7 +28,7 @@ def ver_fotos():
     fotos = [
         {
             "id": r[0],
-            "pais": r[1],
+            "pais": get_country_name(r[1], 'es') if r[1] else '',
             "fecha": r[2],
             "link_foto": r[3],
             "user_id": r[4]
