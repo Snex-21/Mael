@@ -81,14 +81,60 @@ class MaelDB:
         cursor.close()
         conexion.close()
     
-    # para borrar un una foto en especifico (por ID)
+    # para borrar una foto en específico (por ID) borrando la fila y reordenando IDs
     def borrar_por_id(self, id):
         conexion = self.conexion_db()
         cursor = conexion.cursor()
-        cursor.execute('DELETE FROM fotos WHERE id = %s;', (id,))
-        conexion.commit()
+        
+        # 1. Obtener la URL de la foto antes de borrar para eliminar de Cloudinary
+        cursor.execute('SELECT link_foto FROM fotos WHERE id = %s;', (id,))
+        registro = cursor.fetchone()
+        link_foto = registro[0] if registro else None
+        
+        if link_foto:
+            # 2. Borrar el registro
+            cursor.execute('DELETE FROM fotos WHERE id = %s;', (id,))
+            conexion.commit()
+            
+            # 3. Reordenar los IDs y reiniciar el contador de la secuencia
+            self.reordenar_ids(cursor, conexion)
+            
         cursor.close()
         conexion.close()
+        return link_foto
+
+    # Reordena secuencialmente los IDs de 1 a N y reinicia la secuencia SERIAL de PostgreSQL
+    def reordenar_ids(self, cursor=None, conexion=None):
+        cerrar_conexion = False
+        if cursor is None:
+            conexion = self.conexion_db()
+            cursor = conexion.cursor()
+            cerrar_conexion = True
+
+        try:
+            # Reasignar IDs en orden continuo
+            cursor.execute('''
+                WITH reordered AS (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS new_id
+                    FROM fotos
+                )
+                UPDATE fotos
+                SET id = reordered.new_id
+                FROM reordered
+                WHERE fotos.id = reordered.id;
+            ''')
+            
+            # Reiniciar la secuencia al máximo ID actual + 1
+            cursor.execute('''
+                SELECT setval(pg_get_serial_sequence('fotos', 'id'), COALESCE(MAX(id), 0) + 1, false) FROM fotos;
+            ''')
+            conexion.commit()
+        except Exception as e:
+            print(f"Error al reordenar IDs: {e}")
+
+        if cerrar_conexion:
+            cursor.close()
+            conexion.close()
     
     # obtener la última foto agregada
     def obtener_ultima_foto(self):
@@ -171,45 +217,3 @@ class MaelDB:
         except Exception as e:
             print(f"Error al ver los datos: {e}") 
     
-    # Borrar una linea por la columna ID y reordenar los IDs para que queden en orden
-    def borrar_y_reordenar(self, id_a_borrar):
-        try:
-            conexion = self.conexion_db()
-            cursor = conexion.cursor()
-            
-            # Borrar todos los registros
-            cursor.execute("DELETE FROM fotos WHERE id = %s RETURNING id;", (id_a_borrar,))
-            if cursor.fetchone() is None:
-                        conexion.rollback()
-                        print(f"No existe ningún registro con ID {id_a_borrar}.")
-                        return
-            
-            cursor.execute("SELECT COALESCE(MAX(id), 0) + COUNT(*) + 1 FROM fotos;")
-            desplazamiento = cursor.fetchone()[0]
-            cursor.execute("UPDATE fotos SET id = id + %s;", (desplazamiento,))
-            cursor.execute("""
-                WITH nuevos_ids AS (
-                    SELECT id AS id_temporal,
-                            ROW_NUMBER() OVER (ORDER BY id) AS nuevo_id
-                    FROM fotos
-                )
-                UPDATE fotos AS f
-                SET id = nuevos_ids.nuevo_id
-                FROM nuevos_ids
-                WHERE f.id = nuevos_ids.id_temporal;
-            """)
-            cursor.execute("SELECT pg_get_serial_sequence('fotos', 'id');")
-            secuencia = cursor.fetchone()[0]
-            if secuencia:
-                cursor.execute("SELECT COUNT(*) FROM fotos;")
-                total_registros = cursor.fetchone()[0]
-                cursor.execute("SELECT setval(%s, %s, false);", (secuencia, max(total_registros, 1)))
-                conexion.commit()
-                print(f"Registro con ID {id_a_borrar} eliminado y IDs reordenados.")            
-        except Exception as e:
-            if conexion is not None:
-                conexion.rollback()
-            print(f"Error al borrar y reordenar los IDs: {e}")
-        finally:
-                if conexion is not None:
-                    conexion.close()

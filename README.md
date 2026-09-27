@@ -68,9 +68,10 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
 - [ ] panel de control (para admin):
     - [ ] poder autorizar o no que foto se sube a la bd y al cloudinary
     - [x] poder ver la cantidad de fotos que hay, con sus fechas y paises
-        - [ ] poder el ver la cantidad de fotos con cierta fecha o pais (de ser posible ordenados del mayor al menor)
+        - [ ] poder el ver la cantidad de fotos con cierta fecha o pais
+            - [ ] ordenadas del mayor al menor
     - [ ] poder ver la persona que mas aportó 
-    - [ ] poder eliminar una foto de la bd y del cloudinary
+    - [x] poder eliminar una foto de la bd y del cloudinary
     - [ ] poder agg comentarios privado
     - [ ] detección de imágenes duplicadas
         - [ ] descarte automatico de imágenes duplicadas

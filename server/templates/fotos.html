@@ -1,63 +1,235 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Fotos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Fotos - Mael Admin</title>
     <style>
-        body{
-            margin:0;
-            background:#0f0f0f;
-            color:white;
-            font-family:Arial;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        header{
-            background:#1a1a1a;
-            padding:15px;
+        body {
+            background: #0f0f0f;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
         }
-        table{
-            width:100%;
-            border-collapse:collapse;
+        header {
+            background: #18181c;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a2a30;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        th, td{
-            border:1px solid #222;
-            padding:10px;
-            font-size:14px;
+        header h3 {
+            font-size: 1.2rem;
+            color: #ffffff;
         }
-        th{
-            background:#1a1a1a;
+        .back-btn {
+            color: #8a99ff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
         }
-        tr:nth-child(even){
-            background:#111;
+        .back-btn:hover {
+            color: #b3bdff;
         }
-        a{
-            color:#5c5cff;
-            text-decoration:none;
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background: #16161a;
+            border-radius: 10px;
+            border: 1px solid #26262e;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 600px;
+        }
+        th, td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #22222a;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        th {
+            background: #1c1c22;
+            color: #a0a0b0;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        tr:hover {
+            background: #1d1d24;
+        }
+        .img-thumb {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #333340;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .img-thumb:hover {
+            transform: scale(1.08);
+            border-color: #5c5cff;
+        }
+        .btn-delete {
+            background: #e63946;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-delete:hover {
+            background: #ff4d5a;
+        }
+        .btn-delete:active {
+            transform: scale(0.96);
+        }
+        
+        /* Modal de Previsualización (Lightbox) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+            object-fit: contain;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: #ffffff;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #ff4d5a;
+        }
+        
+        @media (max-width: 640px) {
+            header {
+                padding: 12px 15px;
+            }
+            .main-content {
+                padding: 12px;
+            }
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            .img-thumb {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <a href="/admin">⬅ Volver</a>
-    <h3>Tabla de fotos</h3>
+    <a href="/admin" class="back-btn">⬅ Volver</a>
+    <h3>Colección de Fotos</h3>
 </header>
 
-<table>
-    <tr>
-        <th>ID</th>
-        <th>País</th>
-        <th>Fecha</th>
-        <th>Link</th>
-    </tr>
+<div class="main-content">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Previsualización</th>
+                    <th>País</th>
+                    <th>Fecha</th>
+                    <th>Usuario ID</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in fotos %}
+                <tr>
+                    <td><strong>#{{ f.id }}</strong></td>
+                    <td>
+                        <img src="{{ f.link_foto }}" alt="Foto #{{ f.id }}" class="img-thumb" onclick="openModal('{{ f.link_foto }}')">
+                    </td>
+                    <td>{{ f.pais }}</td>
+                    <td>{{ f.fecha }}</td>
+                    <td>{{ f.user_id }}</td>
+                    <td>
+                        <form action="/admin/fotos/eliminar/{{ f.id }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que querés eliminar la foto #{{ f.id }}? Se borrará de la BD y de Cloudinary.');">
+                            <button type="submit" class="btn-delete">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    {% for f in fotos %}
-    <tr>
-        <td>{{ f.id }}</td>
-        <td>{{ f.pais }}</td>
-        <td>{{ f.fecha }}</td>
-        <td><a href="{{ f.link_foto }}" target="_blank">Ver</a></td>
-    </tr>
-    {% endfor %}
-</table>
+<!-- Modal Lightbox -->
+<div id="imgModal" class="modal" onclick="closeModal(event)">
+    <span class="modal-close" onclick="closeModal(event)">&times;</span>
+    <img class="modal-content" id="modalImg" alt="Previsualización grande">
+</div>
+
+<script>
+    function openModal(src) {
+        const modal = document.getElementById('imgModal');
+        const modalImg = document.getElementById('modalImg');
+        modalImg.src = src;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal(e) {
+        if (e.target.id === 'imgModal' || e.target.className === 'modal-close') {
+            document.getElementById('imgModal').style.display = 'none';
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('imgModal').style.display = 'none';
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -37,3 +37,24 @@ def ver_fotos():
     ]
 
     return render_template("fotos.html", fotos=fotos)
+
+@routes_bp.route("/admin/fotos/eliminar/<int:foto_id>", methods=["POST", "GET"])
+def eliminar_foto(foto_id):
+    protect = check_admin()
+    if protect:
+        return protect
+
+    from handlers.db import MaelDB
+    from handlers.img import LinkImage
+
+    db = MaelDB()
+    # Borra de la BD y nos retorna el link de la foto
+    link_foto = db.borrar_por_id(foto_id)
+
+    if link_foto:
+        # Borra la imagen en Cloudinary
+        img = LinkImage()
+        img.borrar_foto(link_foto)
+
+    from flask import redirect, url_for
+    return redirect(url_for("routes.ver_fotos"))
