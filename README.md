@@ -84,7 +84,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
 - [ ] si un usuario probó con 5 fechas y ninguna tiene foto, que el bot le mande 5 fechas que tengan foto al azar
 - [ ] poner en alguna parte la cantidad de fotos que hay disponibles (se va actualizando cada que se consulte)
 - [ ] que el bot pueda obtener el arroba del usuario y si esta disponible (si no con su ID) preguntarle si quiere que esa información aparezca con su foto
-- [ ] soporte para varios idiomas 
+- [x] soporte para varios idiomas 
 ---
 
 ## Licencia

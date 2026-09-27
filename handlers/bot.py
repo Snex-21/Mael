@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 from .img import LinkImage
 from .db import MaelDB
 from .claves import config
+from .i18n import get_text, get_months
+from .countries import get_country_name, parse_country_to_code
 
 # el bot en cuestion
 class Mael:
-    def __init__(self, api_tg , api_id, api_hash, nombre = 'Mael'):
+    def __init__(self, api_tg, api_id, api_hash, nombre='Mael'):
         self.nombre = nombre
         self.api_tg = api_tg
         self.api_id = api_id
@@ -54,64 +56,65 @@ class Mael:
         # ruta de la ultima imagen que pasó el usuario
         self.path = config.root_dir / 'downloads' / 'ultima_imagen.jpg'
 
-        # Teclado de selección de país (dinámico desde la BD)
-        def obtener_teclado_paises():
+        # Teclado de selección de país (dinámico desde la BD traducido al idioma del usuario)
+        def obtener_teclado_paises(lang_code):
             db = MaelDB()
-            paises_existentes = db.obtener_paises_unicos()
+            codigos_existentes = db.obtener_paises_unicos()
             
             botones = []
             # Agrupamos los países existentes de a 2 por fila
-            for i in range(0, len(paises_existentes), 2):
-                par = paises_existentes[i:i+2]
-                fila_botones = [InlineKeyboardButton(p, callback_data=f"pais_{p}") for p in par]
+            for i in range(0, len(codigos_existentes), 2):
+                par = codigos_existentes[i:i+2]
+                fila_botones = [
+                    InlineKeyboardButton(get_country_name(c, lang_code), callback_data=f"pais_{c}")
+                    for c in par
+                ]
                 botones.append(fila_botones)
             
             # Siempre agregamos al final la opción de escribir otro país
-            botones.append([InlineKeyboardButton("Otro país", callback_data="pais_OTRO")])
+            botones.append([InlineKeyboardButton(get_text(lang_code, 'btn_otro_pais'), callback_data="pais_OTRO")])
             return InlineKeyboardMarkup(botones)
 
-        # Nombres de meses para el selector
-        MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-
         # Teclado de selección de fecha (rápida o interactiva por calendario)
-        def obtener_teclado_fechas():
+        def obtener_teclado_fechas(lang_code):
             hoy_dt = datetime.now()
             hoy_str = hoy_dt.strftime('%d/%m/%Y')
             ayer_str = (hoy_dt - timedelta(days=1)).strftime('%d/%m/%Y')
             
             botones = [
-                [InlineKeyboardButton(f"Hoy ({hoy_str})", callback_data=f"fecha_{hoy_str}")],
-                [InlineKeyboardButton(f"Ayer ({ayer_str})", callback_data=f"fecha_{ayer_str}")],
-                [InlineKeyboardButton("Elegir fecha con botones", callback_data="cal_año_init")],
-                [InlineKeyboardButton("Escribir otra fecha", callback_data="fecha_OTRA")]
+                [InlineKeyboardButton(get_text(lang_code, 'btn_hoy', fecha=hoy_str), callback_data=f"fecha_{hoy_str}")],
+                [InlineKeyboardButton(get_text(lang_code, 'btn_ayer', fecha=ayer_str), callback_data=f"fecha_{ayer_str}")],
+                [InlineKeyboardButton(get_text(lang_code, 'btn_elegir_calendario'), callback_data="cal_año_init")],
+                [InlineKeyboardButton(get_text(lang_code, 'btn_escribir_otra_fecha'), callback_data="fecha_OTRA")]
             ]
             return InlineKeyboardMarkup(botones)
 
         # Selector de Año interactivo
-        def obtener_teclado_años():
+        def obtener_teclado_años(lang_code):
             año_actual = datetime.now().year
             años = range(año_actual, año_actual - 6, -1)  # últimos 6 años
             botones = []
             for i in range(0, len(años), 3):
                 fila = [InlineKeyboardButton(str(a), callback_data=f"cal_año_{a}") for a in años[i:i+3]]
                 botones.append(fila)
-            botones.append([InlineKeyboardButton("⬅ Volver a opciones", callback_data="cal_volver_inicio")])
+            botones.append([InlineKeyboardButton(get_text(lang_code, 'btn_volver_opciones'), callback_data="cal_volver_inicio")])
             return InlineKeyboardMarkup(botones)
 
         # Selector de Mes interactivo
-        def obtener_teclado_meses(año):
+        def obtener_teclado_meses(año, lang_code):
+            meses_nombres = get_months(lang_code)
             botones = []
             for i in range(0, 12, 4):
                 fila = [
-                    InlineKeyboardButton(MESES[m], callback_data=f"cal_mes_{año}_{m+1}")
+                    InlineKeyboardButton(meses_nombres[m], callback_data=f"cal_mes_{año}_{m+1}")
                     for m in range(i, i+4)
                 ]
                 botones.append(fila)
-            botones.append([InlineKeyboardButton("⬅ Cambiar año", callback_data="cal_año_init")])
+            botones.append([InlineKeyboardButton(get_text(lang_code, 'btn_cambiar_ano'), callback_data="cal_año_init")])
             return InlineKeyboardMarkup(botones)
 
         # Selector de Día interactivo
-        def obtener_teclado_dias(año, mes):
+        def obtener_teclado_dias(año, mes, lang_code):
             import calendar
             num_dias = calendar.monthrange(año, mes)[1]
             botones = []
@@ -123,12 +126,13 @@ class Mael:
                     fila = []
             if fila:
                 botones.append(fila)
-            botones.append([InlineKeyboardButton("⬅ Cambiar mes", callback_data=f"cal_año_{año}")])
+            botones.append([InlineKeyboardButton(get_text(lang_code, 'btn_cambiar_mes'), callback_data=f"cal_año_{año}")])
             return InlineKeyboardMarkup(botones)
 
         @self.bot.on_message(filters.command('start'))
         async def start_command(client, message):
-            await message.reply_text("Hola, soy Mael :) guardo fotos del cielo y puedo mostrártelas cuando quieras.\n\nSi querés saber cómo usar mis comandos, escribí /info y te cuento todo.") 
+            lang = message.from_user.language_code
+            await message.reply_text(get_text(lang, 'start'))
             
             user_id = message.from_user.id
             self.user_states[user_id] = 'iniciado'
@@ -136,7 +140,8 @@ class Mael:
         # para buscar una ft
         @self.bot.on_message(filters.command('buscar'))
         async def buscar_foto(client, message):
-            await message.reply_text('Para buscar una foto del cielo en mi colección, por favor envíame la fecha en formato dia/mes/año (por ejemplo: 2/6/2024) :)') #v
+            lang = message.from_user.language_code
+            await message.reply_text(get_text(lang, 'buscar_prompt'))
             
             user_id = message.from_user.id
             self.user_states[user_id] = 'esperando fecha'
@@ -145,27 +150,32 @@ class Mael:
         @self.bot.on_message(filters.text & self.esperando_fecha())
         async def mandar_foto(client, message):
             user_id = message.from_user.id
+            lang = message.from_user.language_code
             
             text = message.text.strip()
             texto = text.split()
             fecha = str(texto[0])
             
             if self.user_states.get(user_id) != 'esperando fecha':
-                await message.reply_text('Para buscar una foto, recordá usar primero el comando /buscar :)')
+                await message.reply_text(get_text(lang, 'buscar_error_estado'))
                 return
             
             mael = MaelDB()
             # se busca la foto
-            foto, pais = mael.foto(fecha) 
+            foto, pais_codigo = mael.foto(fecha) 
             
             if foto is None:
-                await message.reply_text(f'No encontré ninguna foto guardada para el {fecha} :/\nProbá enviándome otra fecha en formato dia/mes/año.')
-            
+                await message.reply_text(get_text(lang, 'buscar_no_encontrada', fecha=fecha))
             else:
+                pais_nombre = get_country_name(pais_codigo, lang)
+                caption = get_text(lang, 'buscar_exito_caption', fecha=fecha)
+                if pais_nombre:
+                    caption += f" ({pais_nombre})"
+                
                 await client.send_photo(
                     chat_id = message.from_user.id,
                     photo = foto,
-                    caption = f'Acá tenés la foto del cielo del {fecha} tomada en {pais} :D'
+                    caption = caption
                 )
             
             self.user_states[user_id] = 'iniciado'
@@ -174,49 +184,55 @@ class Mael:
         @self.bot.on_message(filters.command('agg'))
         async def añadir_foto(client, message):
             user_id = message.from_user.id
+            lang = message.from_user.language_code
             self.user_states[user_id] = 'esperando foto'
-            self.user_data.pop(user_id, None)
-            await message.reply_text('Genial! Mandame la foto del cielo que querés agregar :D')
+            self.user_data[user_id] = {'lang': lang}
+            await message.reply_text(get_text(lang, 'agg_inicio'))
             
         # para filtrar la foto
         @self.bot.on_message(filters.photo)
         async def foto(client, message):
             user_id = message.from_user.id
+            lang = message.from_user.language_code
             if self.user_states.get(user_id) != 'esperando foto':
-                await message.reply_text('Si querés agregar una foto a la colección, primero usá el comando /agg :)')
+                await message.reply_text(get_text(lang, 'agg_error_estado_foto'))
                 return
             
             file_path = await client.download_media(message, self.path)
-            self.user_data[user_id] = {'foto': file_path}
+            self.user_data[user_id] = {'foto': file_path, 'lang': lang}
             self.user_states[user_id] = 'esperando_seleccion_pais'
             
             await message.reply_text(
-                'Qué linda foto! Seleccioná el país donde fue tomada o elegí "Otro país" para escribirlo :)',
-                reply_markup=obtener_teclado_paises()
+                get_text(lang, 'agg_foto_recibida'),
+                reply_markup=obtener_teclado_paises(lang)
             )
 
         # Manejador de botones inline (Callback Query)
         @self.bot.on_callback_query()
         async def callback_handler(client, callback_query):
             user_id = callback_query.from_user.id
+            lang = callback_query.from_user.language_code
             data = callback_query.data
 
             if user_id not in self.user_data:
-                await callback_query.answer("Por favor iniciá de nuevo con /agg :)", show_alert=True)
+                await callback_query.answer(get_text(lang, 'agg_sesion_expirada'), show_alert=True)
                 return
+
+            self.user_data[user_id]['lang'] = lang
 
             # Manejo de selección de País
             if data.startswith("pais_"):
-                pais = data.replace("pais_", "")
-                if pais == "OTRO":
+                codigo_pais = data.replace("pais_", "")
+                if codigo_pais == "OTRO":
                     self.user_states[user_id] = 'esperando_pais_texto'
-                    await callback_query.message.edit_text("Por favor escribí el nombre del país donde sacaste la foto :)")
+                    await callback_query.message.edit_text(get_text(lang, 'agg_pedir_pais_texto'))
                 else:
-                    self.user_data[user_id]['pais'] = pais
+                    self.user_data[user_id]['pais'] = codigo_pais
                     self.user_states[user_id] = 'esperando_seleccion_fecha'
+                    pais_nombre = get_country_name(codigo_pais, lang)
                     await callback_query.message.edit_text(
-                        f"País seleccionado: {pais} :D\nAhora seleccioná la fecha de la foto:",
-                        reply_markup=obtener_teclado_fechas()
+                        get_text(lang, 'agg_pais_seleccionado', pais=pais_nombre),
+                        reply_markup=obtener_teclado_fechas(lang)
                     )
                 await callback_query.answer()
 
@@ -225,27 +241,28 @@ class Mael:
                 fecha = data.replace("fecha_", "")
                 if fecha == "OTRA":
                     self.user_states[user_id] = 'esperando_fecha_texto'
-                    await callback_query.message.edit_text("Por favor enviame la fecha en formato dia/mes/año (ejemplo: 21/9/2026) :)") #v
+                    await callback_query.message.edit_text(get_text(lang, 'agg_pedir_fecha_texto'))
                 else:
                     self.user_data[user_id]['fecha'] = fecha
-                    await callback_query.message.edit_text(f"Fecha seleccionada: {fecha} :) Guardando foto...")
-                    await finalizar_guardado(client, callback_query.message, user_id)
+                    await callback_query.message.edit_text(get_text(lang, 'agg_guardando', fecha=fecha))
+                    await finalizar_guardado(client, callback_query.message, user_id, lang)
                 await callback_query.answer()
 
             # Calendario Interactivo: Paso 1 - Seleccionar Año
             elif data == "cal_año_init":
                 await callback_query.message.edit_text(
-                    "Seleccioná el año:",
-                    reply_markup=obtener_teclado_años()
+                    get_text(lang, 'cal_seleccionar_ano'),
+                    reply_markup=obtener_teclado_años(lang)
                 )
                 await callback_query.answer()
 
             # Calendario Interactivo: Volver al menú principal de fechas
             elif data == "cal_volver_inicio":
-                pais = self.user_data.get(user_id, {}).get('pais', '')
+                codigo_pais = self.user_data.get(user_id, {}).get('pais', '')
+                pais_nombre = get_country_name(codigo_pais, lang)
                 await callback_query.message.edit_text(
-                    f"País seleccionado: {pais} :D\nAhora seleccioná la fecha de la foto:",
-                    reply_markup=obtener_teclado_fechas()
+                    get_text(lang, 'agg_pais_seleccionado', pais=pais_nombre),
+                    reply_markup=obtener_teclado_fechas(lang)
                 )
                 await callback_query.answer()
 
@@ -254,8 +271,8 @@ class Mael:
                 año = int(data.replace("cal_año_", ""))
                 self.user_data[user_id]['temp_año'] = año
                 await callback_query.message.edit_text(
-                    f"Año: {año} :D\nSeleccioná el mes:",
-                    reply_markup=obtener_teclado_meses(año)
+                    get_text(lang, 'cal_seleccionar_mes', ano=año),
+                    reply_markup=obtener_teclado_meses(año, lang)
                 )
                 await callback_query.answer()
 
@@ -264,10 +281,10 @@ class Mael:
                 _, _, año_str, mes_str = data.split("_")
                 año, mes = int(año_str), int(mes_str)
                 self.user_data[user_id]['temp_mes'] = mes
-                nombre_mes = MESES[mes - 1]
+                nombre_mes = get_months(lang)[mes - 1]
                 await callback_query.message.edit_text(
-                    f"Año: {año} | Mes: {nombre_mes} :D\nSeleccioná el día del mes:",
-                    reply_markup=obtener_teclado_dias(año, mes)
+                    get_text(lang, 'cal_seleccionar_dia', ano=año, mes=nombre_mes),
+                    reply_markup=obtener_teclado_dias(año, mes, lang)
                 )
                 await callback_query.answer()
 
@@ -276,96 +293,102 @@ class Mael:
                 _, _, año_str, mes_str, dia_str = data.split("_")
                 fecha = f"{int(dia_str)}/{int(mes_str)}/{año_str}"
                 self.user_data[user_id]['fecha'] = fecha
-                await callback_query.message.edit_text(f"Fecha seleccionada: {fecha} :) Guardando foto...")
-                await finalizar_guardado(client, callback_query.message, user_id)
+                await callback_query.message.edit_text(get_text(lang, 'agg_guardando', fecha=fecha))
+                await finalizar_guardado(client, callback_query.message, user_id, lang)
                 await callback_query.answer()
 
         # Si el usuario eligió escribir el país manualmente
         @self.bot.on_message(filters.text & self.esperando_pais_texto())
         async def pais_texto(client, message):
             user_id = message.from_user.id
+            lang = message.from_user.language_code
             if message.text.startswith('/'):
                 return
-            pais = message.text.strip().capitalize()
-            self.user_data[user_id]['pais'] = pais
+            pais_input = message.text.strip()
+            codigo_iso = parse_country_to_code(pais_input)
+            
+            self.user_data[user_id]['pais'] = codigo_iso
             self.user_states[user_id] = 'esperando_seleccion_fecha'
+            
+            pais_nombre = get_country_name(codigo_iso, lang)
             await message.reply_text(
-                f"País guardado: {pais} :D\nAhora seleccioná la fecha de la foto:",
-                reply_markup=obtener_teclado_fechas()
+                get_text(lang, 'agg_pais_seleccionado', pais=pais_nombre),
+                reply_markup=obtener_teclado_fechas(lang)
             )
 
         # Si el usuario eligió escribir la fecha manualmente
         @self.bot.on_message(filters.text & self.esperando_fecha_texto())
         async def fecha_texto(client, message):
             user_id = message.from_user.id
+            lang = message.from_user.language_code
             if message.text.startswith('/'):
                 return
             fecha = message.text.strip()
             self.user_data[user_id]['fecha'] = fecha
-            await message.reply_text(f"Fecha guardada: {fecha} :) Guardando foto...")
-            await finalizar_guardado(client, message, user_id)
+            await message.reply_text(get_text(lang, 'agg_guardando', fecha=fecha))
+            await finalizar_guardado(client, message, user_id, lang)
 
         # Función auxiliar para subida y guardado final en BD
-        async def finalizar_guardado(client, message, user_id):
+        async def finalizar_guardado(client, message, user_id, lang_code=None):
             datos = self.user_data.get(user_id, {})
-            pais = datos.get('pais')
+            codigo_pais = datos.get('pais')
             fecha = datos.get('fecha')
+            lang = lang_code or datos.get('lang')
             
             img = LinkImage()
             link = img.link_image()
             
             db = MaelDB()
-            db.insertar_dato(foto=link, fecha=fecha, pais=pais, user_id=user_id)
+            db.insertar_dato(foto=link, fecha=fecha, pais=codigo_pais, user_id=user_id)
             
             self.user_states[user_id] = 'iniciado'
             self.user_data.pop(user_id, None)
             
-            await message.reply_text(f'Listo! Guardé la foto tomada en {pais} el {fecha}. Muchas gracias por compartirla con la colección :D')
+            pais_nombre = get_country_name(codigo_pais, lang)
+            await message.reply_text(get_text(lang, 'agg_exito', pais=pais_nombre, fecha=fecha))
         
         @self.bot.on_message(filters.command('ultima'))
         async def ultima_foto(client, message):
+            lang = message.from_user.language_code
             db = MaelDB()
             datos = db.obtener_ultima_foto()
             if not datos:
-                await message.reply_text('Todavía no hay ninguna foto en la colección :/')
+                await message.reply_text(get_text(lang, 'ultima_vacia'))
                 return
             
-            pais, fecha, link_foto = datos
+            pais_codigo, fecha, link_foto = datos
             fecha_str = fecha.strftime('%d/%m/%Y') if hasattr(fecha, 'strftime') else str(fecha)
+            pais_nombre = get_country_name(pais_codigo, lang)
             
             await client.send_photo(
                 chat_id=message.chat.id,
                 photo=link_foto,
-                caption=f"Última foto agregada\nPaís: {pais}\nFecha: {fecha_str} :D"
+                caption=get_text(lang, 'ultima_caption', pais=pais_nombre, fecha=fecha_str)
             )
 
         @self.bot.on_message(filters.command('info'))
         async def help_command(client, message):
-            await message.reply_text("""Acá tenés los comandos disponibles :)
-
-/buscar - Te muestro una foto del cielo según la fecha que me indiques (dia/mes/año).
-/agg - Guardamos una nueva foto del cielo en la colección.
-/ultima - Te muestro la última foto que se agregó al sistema.
-/misaportes - Te muestro todas las fotos que aportaste hasta ahora.
-
-Cualquier cosa que necesites, acá estoy :D""")
+            lang = message.from_user.language_code
+            await message.reply_text(get_text(lang, 'info'))
         
         # un mensajito de prueba
         @self.bot.on_message(filters.text & ~filters.regex(r'^/'))
         async def saludo(client, message):
-            await message.reply_text('holaa, gracias por usar mi proyecto y contribuir con tus fotos del cielo :D \n\n-Snex')
+            lang = message.from_user.language_code
+            await message.reply_text(get_text(lang, 'saludo'))
         
         # comando para ver todas fotos aportadas por el usuario que usa el comando
         @self.bot.on_message(filters.command('misaportes'))
         async def fotos_aportadas(client, message):
             user_id = message.from_user.id
+            lang = message.from_user.language_code
             db = MaelDB()
             fotos = db.fotos_aportadas(id=user_id)
             if not fotos:
-                await message.reply('Aún no tenés fotos aportadas :/\nPodés agregar una cuando quieras con el comando /agg!')
+                await message.reply(get_text(lang, 'misaportes_vacio'))
                 return
             else:
-                texto = f'Hasta ahora aportaste {len(fotos)} foto/s a la colección :D\n\n'
+                texto = get_text(lang, 'misaportes_header', cantidad=len(fotos))
                 for i, fecha in enumerate(fotos, start=1):
                     texto += f'{i}. {fecha}\n'
             await message.reply_text(texto)
