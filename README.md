@@ -65,7 +65,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
 
 ## futuras implementaciones
 
-- [ ] panel de control (para admin):
+- [x] panel de control (para admin):
     - [ ] poder autorizar o no que foto se sube a la bd y al cloudinary
     - [x] poder ver la cantidad de fotos que hay, con sus fechas y paises
         - [ ] poder el ver la cantidad de fotos con cierta fecha o pais
@@ -77,7 +77,7 @@ Se usa junto con su librería oficial (**[pycloudinary](https://github.com/cloud
         - [ ] descarte automatico de imágenes duplicadas
 - [x] que se guarde en la bd el id del usuario que agregó la foto
     - [x] que el usuario pueda ver las fotos que aportó
-    - [ ] agregar una forma de que el usuario que mando una foto pueda borrarla si quiere (por id)
+    - [x] agregar una forma de que el usuario que mando una foto pueda borrarla si quiere (por id)
 - [x] mejor manejo de las fechas
 - [ ] mejora de errores y excepciones provocadas por el usuario
 - [x] mejorar los mensajes de Mael
@@ -94,7 +94,7 @@ Este proyecto está licenciado bajo la licencia **[MIT License](LICENSE)**.
 
 ## ¿Preguntas, sugerencias o bugs?
 
-Abre un [issue](https://github.com/Snex-21/Lazarus/issues) en el repositorio.
+Abre un [issue](https://github.com/Snex-21/Mael/issues) en el repositorio.
 
 ---
 

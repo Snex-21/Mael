@@ -206,6 +206,85 @@ class Mael:
                 get_text(lang, 'agg_foto_recibida'),
                 reply_markup=obtener_teclado_paises(lang)
             )
+        # Teclado de navegación para la galería de aportes del usuario
+        def obtener_teclado_galeria_aportes(idx, total, foto_id, lang_code):
+            botones = []
+            fila_nav = []
+            
+            if idx > 0:
+                fila_nav.append(InlineKeyboardButton(get_text(lang_code, 'btn_anterior'), callback_data=f"nav_aporte_{idx-1}"))
+            if idx < total - 1:
+                fila_nav.append(InlineKeyboardButton(get_text(lang_code, 'btn_siguiente'), callback_data=f"nav_aporte_{idx+1}"))
+            
+            if fila_nav:
+                botones.append(fila_nav)
+            
+            botones.append([InlineKeyboardButton(get_text(lang_code, 'btn_eliminar_aporte'), callback_data=f"del_aporte_ask_{foto_id}_{idx}")])
+            return InlineKeyboardMarkup(botones)
+
+        # Teclado de confirmación de borrado
+        def obtener_teclado_confirmar_borrado(foto_id, idx, lang_code):
+            botones = [
+                [
+                    InlineKeyboardButton(get_text(lang_code, 'btn_confirmar_si'), callback_data=f"del_aporte_confirm_{foto_id}_{idx}"),
+                    InlineKeyboardButton(get_text(lang_code, 'btn_confirmar_no'), callback_data=f"nav_aporte_{idx}")
+                ]
+            ]
+            return InlineKeyboardMarkup(botones)
+
+        # Helper para enviar o editar la foto de la galería de aportes
+        async def mostrar_aporte_galeria(client, chat_id, user_id, idx, lang_code, message_to_edit=None):
+            db = MaelDB()
+            fotos = db.fotos_aportadas(user_id)
+            
+            if not fotos:
+                if message_to_edit:
+                    await message_to_edit.edit_text(get_text(lang_code, 'misaportes_vacio'))
+                else:
+                    await client.send_message(chat_id, get_text(lang_code, 'misaportes_vacio'))
+                return
+
+            # Ajustar índice si sobrepasa los límites tras un borrado
+            if idx >= len(fotos):
+                idx = len(fotos) - 1
+            if idx < 0:
+                idx = 0
+
+            foto_id, pais_codigo, fecha, link_foto = fotos[idx]
+            fecha_str = fecha.strftime('%d/%m/%Y') if hasattr(fecha, 'strftime') else str(fecha)
+            pais_nombre = get_country_name(pais_codigo, lang_code)
+            
+            caption = get_text(
+                lang_code,
+                'misaportes_caption',
+                actual=idx + 1,
+                total=len(fotos),
+                foto_id=foto_id,
+                pais=pais_nombre,
+                fecha=fecha_str
+            )
+            markup = obtener_teclado_galeria_aportes(idx, len(fotos), foto_id, lang_code)
+
+            from pyrogram.types import InputMediaPhoto
+
+            if message_to_edit:
+                try:
+                    await message_to_edit.edit_media(
+                        media=InputMediaPhoto(media=link_foto, caption=caption),
+                        reply_markup=markup
+                    )
+                except Exception:
+                    await message_to_edit.edit_caption(
+                        caption=caption,
+                        reply_markup=markup
+                    )
+            else:
+                await client.send_photo(
+                    chat_id=chat_id,
+                    photo=link_foto,
+                    caption=caption,
+                    reply_markup=markup
+                )
 
         # Manejador de botones inline (Callback Query)
         @self.bot.on_callback_query()
@@ -213,6 +292,84 @@ class Mael:
             user_id = callback_query.from_user.id
             lang = callback_query.from_user.language_code
             data = callback_query.data
+
+            # Navegación por la galería de aportes
+            if data.startswith("nav_aporte_"):
+                idx = int(data.replace("nav_aporte_", ""))
+                await mostrar_aporte_galeria(
+                    client,
+                    callback_query.message.chat.id,
+                    user_id,
+                    idx,
+                    lang,
+                    message_to_edit=callback_query.message
+                )
+                await callback_query.answer()
+                return
+
+            # Confirmación previa de eliminación de foto
+            elif data.startswith("del_aporte_ask_"):
+                _, _, _, foto_id_str, idx_str = data.split("_")
+                foto_id = int(foto_id_str)
+                idx = int(idx_str)
+                
+                db = MaelDB()
+                fotos = db.fotos_aportadas(user_id)
+                if not fotos or idx >= len(fotos):
+                    await callback_query.answer(get_text(lang, 'misaportes_vacio'), show_alert=True)
+                    return
+                
+                _, pais_codigo, fecha, _ = fotos[idx]
+                fecha_str = fecha.strftime('%d/%m/%Y') if hasattr(fecha, 'strftime') else str(fecha)
+                pais_nombre = get_country_name(pais_codigo, lang)
+                
+                prompt = get_text(
+                    lang,
+                    'misaportes_confirmar_borrar',
+                    foto_id=foto_id,
+                    pais=pais_nombre,
+                    fecha=fecha_str
+                )
+                markup = obtener_teclado_confirmar_borrado(foto_id, idx, lang)
+                
+                await callback_query.message.edit_caption(
+                    caption=prompt,
+                    reply_markup=markup
+                )
+                await callback_query.answer()
+                return
+
+            # Ejecución de eliminación del aporte del usuario
+            elif data.startswith("del_aporte_confirm_"):
+                _, _, _, foto_id_str, idx_str = data.split("_")
+                foto_id = int(foto_id_str)
+                idx = int(idx_str)
+                
+                db = MaelDB()
+                link_foto = db.borrar_foto_usuario(foto_id, user_id)
+                
+                if link_foto:
+                    # Borrar de Cloudinary
+                    img = LinkImage()
+                    img.borrar_foto(link_foto)
+                    
+                    await callback_query.answer(
+                        get_text(lang, 'misaportes_borrado_exito', foto_id=foto_id),
+                        show_alert=True
+                    )
+                    
+                    # Refrescar la galería con el siguiente/anterior aporte disponible
+                    await mostrar_aporte_galeria(
+                        client,
+                        callback_query.message.chat.id,
+                        user_id,
+                        idx,
+                        lang,
+                        message_to_edit=callback_query.message
+                    )
+                else:
+                    await callback_query.answer("No tenés permisos para eliminar esta foto :/", show_alert=True)
+                return
 
             if user_id not in self.user_data:
                 await callback_query.answer(get_text(lang, 'agg_sesion_expirada'), show_alert=True)
@@ -382,16 +539,12 @@ class Mael:
         async def fotos_aportadas(client, message):
             user_id = message.from_user.id
             lang = message.from_user.language_code
-            db = MaelDB()
-            fotos = db.fotos_aportadas(id=user_id)
-            if not fotos:
-                await message.reply(get_text(lang, 'misaportes_vacio'))
-                return
-            else:
-                texto = get_text(lang, 'misaportes_header', cantidad=len(fotos))
-                for i, fecha in enumerate(fotos, start=1):
-                    texto += f'{i}. {fecha}\n'
-            await message.reply_text(texto)
-            
+            await mostrar_aporte_galeria(
+                client,
+                message.chat.id,
+                user_id,
+                0,
+                lang
+            )
     def run(self):
         self.bot.run()

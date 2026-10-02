@@ -165,26 +165,39 @@ class MaelDB:
             # retorna la ruta donde se descargo la ft y el codigo de pais
             return ruta, pais
     
-    # atributo para ver las fotos aportadas por un usuario
+    # atributo para ver las fotos aportadas por un usuario con todos los detalles
     def fotos_aportadas(self, id):
         # id del usuario
         self.id = id
         conexion = self.conexion_db()
         cursor = conexion.cursor()
         
-        # busca todas las fechas que haya con el id del usuario
-        query = 'SELECT fecha FROM fotos WHERE user_id = %s ORDER BY fecha ASC'
+        # busca todas las fotos guardadas con el id del usuario
+        query = 'SELECT id, pais, fecha, link_foto FROM fotos WHERE user_id = %s ORDER BY id ASC'
         
         with cursor:
             cursor.execute(query, (self.id,))
             resultado = cursor.fetchall()
-            fechas = []
-            if resultado is None:
-                return fechas
-            for i in resultado:
-                # guardo las fechas en una tupla y despues la retorno
-                fechas.append(i[0])
-            return fechas
+            if not resultado:
+                return []
+            return resultado
+
+    # Borra una foto verificando que pertenezca al usuario que lo solicita
+    def borrar_foto_usuario(self, foto_id, user_id):
+        conexion = self.conexion_db()
+        cursor = conexion.cursor()
+        
+        # Verificar pertenencia del usuario
+        cursor.execute('SELECT link_foto FROM fotos WHERE id = %s AND user_id = %s;', (foto_id, user_id))
+        registro = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+        
+        if not registro:
+            return None
+        
+        # Si pertenece, ejecuta el borrado y reordenamiento general
+        return self.borrar_por_id(foto_id)
 
     # obtener lista de países únicos registrados en la base de datos (códigos ISO)
     def obtener_paises_unicos(self):
